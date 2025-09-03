@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplicación de Práctica de Español</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-start min-h-screen bg-slate-900 p-4">
+
+    <div id="main-app" class="flex flex-col items-center justify-start w-full max-w-lg font-sans p-4 flex-grow">
+        <div class="bg-slate-800 text-white p-8 rounded-2xl shadow-xl w-full flex flex-col items-center space-y-6 transform transition-all duration-300 mb-8">
+            <h1 class="text-4xl font-extrabold mb-4 text-emerald-400 text-center">
+                Aplicación de Práctica de Español
+            </h1>
+            <p class="text-lg text-gray-300 text-center">
+                Traduce la siguiente palabra al inglés:
+            </p>
+
+            <div class="w-full text-center p-4 rounded-xl bg-slate-700 flex flex-col items-center justify-center space-y-4 relative">
+                <p id="spanish-word" class="text-6xl font-bold text-teal-300"></p>
+                <button id="play-audio-btn" class="p-3 rounded-full bg-emerald-500 hover:bg-emerald-600 transition-colors duration-200 focus:outline-none focus:ring-4 focus:ring-emerald-500 focus:ring-opacity-50">
+                    <svg id="audio-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 text-white">
+                        <path d="M13.5 4.5a2.25 2.25 0 00-2.25 2.25v2.25a2.25 2.25 0 004.5 0V6.75a2.25 2.25 0 00-2.25-2.25z" />
+                        <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm0 18a8.25 8.25 0 100-16.5 8.25 8.25 0 000 16.5zm-2.25-8.25a2.25 2.25 0 012.25-2.25h1.5a2.25 2.25 0 012.25 2.25v.75a.75.75 0 001.5 0V12a3.75 3.75 0 00-7.5 0v.75a.75.75 0 001.5 0v-.75z" clip-rule="evenodd" />
+                        <path d="M6.75 12.75a.75.75 0 00-1.5 0v2.5a3 3 0 003 3h2.25a.75.75 0 000-1.5H8.25a1.5 1.5 0 01-1.5-1.5v-2.5zM17.25 12.75a.75.75 0 00-1.5 0v2.5a1.5 1.5 0 01-1.5 1.5h-2.25a.75.75 0 000 1.5h2.25a3 3 0 003-3v-2.5z" />
+                    </svg>
+                </button>
+            </div>
+
+            <input id="answer-input" type="text" placeholder="Escribe tu respuesta aquí..." class="w-full px-4 py-3 text-lg text-slate-900 bg-gray-200 rounded-lg focus:outline-none focus:ring-4 focus:ring-emerald-500 focus:ring-opacity-50 transition-shadow duration-200" />
+
+            <div class="flex space-x-4 w-full justify-center">
+                <button id="check-btn" class="px-6 py-3 font-semibold text-lg text-slate-900 bg-emerald-400 rounded-lg shadow-md hover:bg-emerald-500 transition-colors duration-200 focus:outline-none focus:ring-4 focus:ring-emerald-500 focus:ring-opacity-50">
+                    Verificar
+                </button>
+                <button id="next-btn" class="px-6 py-3 font-semibold text-lg text-slate-900 bg-blue-400 rounded-lg shadow-md hover:bg-blue-500 transition-colors duration-200 focus:outline-none focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50">
+                    Siguiente
+                </button>
+            </div>
+
+            <div id="feedback-message" class="mt-4 px-6 py-3 rounded-lg text-center font-semibold text-lg w-full hidden"></div>
+            <div id="audio-error" class="mt-4 px-6 py-3 rounded-lg text-center font-semibold text-lg w-full bg-red-600 text-white hidden">Tu navegador no soporta la función de audio.</div>
+
+            <div class="flex justify-around w-full mt-6 text-xl">
+                <div class="text-green-400">
+                    Aciertos: <span id="correct-count" class="font-bold">0</span>
+                </div>
+                <div class="text-red-400">
+                    Errores: <span id="incorrect-count" class="font-bold">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección para agregar nuevas palabras -->
+        <div class="bg-slate-800 text-white p-8 rounded-2xl shadow-xl w-full flex flex-col items-center space-y-6 transform transition-all duration-300">
+            <h2 class="text-3xl font-bold text-teal-300 text-center">
+                Agregar Nueva Palabra
+            </h2>
+            <input id="new-spanish-word" type="text" placeholder="Palabra en español" class="w-full px-4 py-3 text-lg text-slate-900 bg-gray-200 rounded-lg focus:outline-none focus:ring-4 focus:ring-teal-500 focus:ring-opacity-50 transition-shadow duration-200" />
+            <input id="new-english-word" type="text" placeholder="Traducción en inglés" class="w-full px-4 py-3 text-lg text-slate-900 bg-gray-200 rounded-lg focus:outline-none focus:ring-4 focus:ring-teal-500 focus:ring-opacity-50 transition-shadow duration-200" />
+            <button id="add-word-btn" class="px-6 py-3 font-semibold text-lg text-slate-900 bg-teal-400 rounded-lg shadow-md hover:bg-teal-500 transition-colors duration-200 focus:outline-none focus:ring-4 focus:ring-teal-500 focus:ring-opacity-50">
+                Agregar Palabra
+            </button>
+        </div>
+        
+        <!-- Botón para mostrar la lista de palabras -->
+        <button id="show-list-btn" class="mt-6 px-6 py-3 font-semibold text-lg text-slate-900 bg-orange-400 rounded-lg shadow-md hover:bg-orange-500 transition-colors duration-200 focus:outline-none focus:ring-4 focus:ring-orange-500 focus:ring-opacity-50">
+            Mostrar Lista de Palabras
+        </button>
+
+        <!-- Sección de la lista de palabras (inicialmente oculta) -->
+        <div id="word-list-container" class="mt-8 bg-slate-800 text-white p-8 rounded-2xl shadow-xl w-full hidden">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-3xl font-bold text-orange-300 text-center">
+                    Lista de Palabras
+                </h2>
+                <button id="close-list-btn" class="px-4 py-2 font-semibold text-sm text-slate-900 bg-red-400 rounded-lg shadow-md hover:bg-red-500 transition-colors duration-200 focus:outline-none focus:ring-4 focus:ring-red-500 focus:ring-opacity-50">
+                    Cerrar
+                </button>
+            </div>
+            <ul id="word-list" class="list-disc list-inside space-y-2 text-lg text-gray-300"></ul>
+        </div>
+    </div>
+
+    <script>
+        const initialWords = [
+            { spanish: 'Hola', english: 'Hello' },
+            { spanish: 'Adiós', english: 'Goodbye' },
+            { spanish: 'Casa', english: 'House' },
+            { spanish: 'Perro', english: 'Dog' },
+            { spanish: 'Gato', english: 'Cat' },
+            { spanish: 'Agua', english: 'Water' },
+            { spanish: 'Comida', english: 'Food' },
+            { spanish: 'Libro', english: 'Book' },
+            { spanish: 'Teléfono', english: 'Phone' },
+            { spanish: 'Coche', english: 'Car' },
+            { spanish: 'Tiempo', english: 'Time' },
+            { spanish: 'Día', english: 'Day' },
+            { spanish: 'Noche', english: 'Night' },
+            { spanish: 'Sol', english: 'Sun' },
+            { spanish: 'Luna', english: 'Moon' },
+            { spanish: 'Estrella', english: 'Star' },
+            { spanish: 'Mano', english: 'Hand' },
+            { spanish: 'Pie', english: 'Foot' },
+            { spanish: 'Corazón', english: 'Heart' },
+            { spanish: 'Cielo', english: 'Sky' },
+            // Diálogos para practicar
+            { spanish: 'Hola, ¿cómo te llamas?', english: 'Hello, what is your name?' },
+            { spanish: 'Me llamo...', english: 'My name is...' },
+            { spanish: '¿De dónde eres?', english: 'Where are you from?' },
+            { spanish: 'Soy de...', english: 'I am from...' },
+            { spanish: '¿A qué te dedicas?', english: 'What do you do for a living?' },
+            { spanish: 'Soy...', english: 'I am...' },
+            { spanish: '¿Dónde vives?', english: 'Where do you live?' },
+            { spanish: 'Vivo en...', english: 'I live in...' },
+        ];
+
+        let wordsList = initialWords;
+        let currentWordIndex = 0;
+        let correctCount = 0;
+        let incorrectCount = 0;
+        let speechSynth = window.speechSynthesis;
+
+        const spanishWordEl = document.getElementById('spanish-word');
+        const answerInputEl = document.getElementById('answer-input');
+        const feedbackMessageEl = document.getElementById('feedback-message');
+        const correctCountEl = document.getElementById('correct-count');
+        const incorrectCountEl = document.getElementById('incorrect-count');
+        const playAudioBtn = document.getElementById('play-audio-btn');
+        const checkBtn = document.getElementById('check-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const newSpanishWordInput = document.getElementById('new-spanish-word');
+        const newEnglishWordInput = document.getElementById('new-english-word');
+        const addWordBtn = document.getElementById('add-word-btn');
+        const audioErrorEl = document.getElementById('audio-error');
+        const showListBtn = document.getElementById('show-list-btn');
+        const closeListBtn = document.getElementById('close-list-btn');
+        const wordListContainer = document.getElementById('word-list-container');
+        const wordListEl = document.getElementById('word-list');
+
+        const updateUI = () => {
+            if (wordsList.length > 0) {
+                const currentWord = wordsList[currentWordIndex];
+                spanishWordEl.textContent = currentWord.spanish;
+            } else {
+                spanishWordEl.textContent = 'Lista vacía';
+            }
+            answerInputEl.value = '';
+            feedbackMessageEl.textContent = '';
+            feedbackMessageEl.classList.add('hidden');
+            checkBtn.disabled = true;
+            nextBtn.disabled = true;
+            answerInputEl.focus();
+        };
+
+        const updateFeedback = (message, isCorrect) => {
+            feedbackMessageEl.textContent = message;
+            feedbackMessageEl.classList.remove('hidden');
+            feedbackMessageEl.classList.remove('bg-green-600', 'bg-red-600');
+            feedbackMessageEl.classList.add(isCorrect ? 'bg-green-600' : 'bg-red-600');
+        };
+
+        const updateScore = () => {
+            correctCountEl.textContent = correctCount;
+            incorrectCountEl.textContent = incorrectCount;
+        };
+
+        const playAudio = () => {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(wordsList[currentWordIndex].spanish);
+                utterance.lang = 'es-ES';
+                speechSynth.speak(utterance);
+            } else {
+                audioErrorEl.classList.remove('hidden');
+            }
+        };
+
+        const checkAnswer = () => {
+            if (answerInputEl.value.trim() === '') return;
+            const currentWord = wordsList[currentWordIndex];
+            const normalizedInput = answerInputEl.value.trim().toLowerCase();
+            const normalizedAnswer = currentWord.english.toLowerCase();
+
+            if (normalizedInput === normalizedAnswer) {
+                updateFeedback('¡Correcto!', true);
+                correctCount++;
+            } else {
+                updateFeedback(`Incorrecto. La respuesta correcta es "${currentWord.english}".`, false);
+                incorrectCount++;
+            }
+            updateScore();
+            checkBtn.disabled = true;
+            nextBtn.disabled = false;
+        };
+
+        const nextWord = () => {
+            currentWordIndex = (currentWordIndex + 1) % wordsList.length;
+            updateUI();
+        };
+
+        const handleAddWord = () => {
+            const spanish = newSpanishWordInput.value.trim();
+            const english = newEnglishWordInput.value.trim();
+            if (spanish !== '' && english !== '') {
+                const newWord = { spanish: spanish, english: english };
+                wordsList.push(newWord);
+                newSpanishWordInput.value = '';
+                newEnglishWordInput.value = '';
+                updateFeedback('¡Palabra agregada con éxito!', true);
+                addWordBtn.disabled = true;
+                nextWord();
+            } else {
+                updateFeedback('Por favor, ingresa tanto la palabra en español como la traducción en inglés.', false);
+            }
+        };
+
+        const showWordList = () => {
+            wordListEl.innerHTML = '';
+            wordsList.forEach((word, index) => {
+                const listItem = document.createElement('li');
+                listItem.classList.add('flex', 'justify-between', 'items-center', 'py-2', 'border-b', 'border-slate-700', 'last:border-b-0');
+                
+                const wordText = document.createElement('span');
+                wordText.textContent = `${word.spanish} - ${word.english}`;
+                
+                const deleteButton = document.createElement('button');
+                deleteButton.classList.add('delete-btn', 'px-3', 'py-1', 'font-semibold', 'text-sm', 'text-slate-900', 'bg-red-400', 'rounded-lg', 'shadow-md', 'hover:bg-red-500', 'transition-colors', 'duration-200', 'focus:outline-none', 'focus:ring-4', 'focus:ring-red-500', 'focus:ring-opacity-50');
+                deleteButton.textContent = 'Eliminar';
+                deleteButton.dataset.index = index;
+
+                listItem.appendChild(wordText);
+                listItem.appendChild(deleteButton);
+                wordListEl.appendChild(listItem);
+            });
+            wordListContainer.classList.remove('hidden');
+        };
+
+        const closeWordList = () => {
+            wordListContainer.classList.add('hidden');
+        };
+
+        const handleDeleteWord = (event) => {
+            if (event.target.classList.contains('delete-btn')) {
+                const index = event.target.dataset.index;
+                wordsList.splice(index, 1);
+                
+                // Si la palabra actual se elimina, reiniciamos el índice si es necesario.
+                if (currentWordIndex >= wordsList.length) {
+                    currentWordIndex = 0;
+                }
+                
+                // Actualizamos la lista y la interfaz de usuario.
+                showWordList();
+                updateUI();
+            }
+        };
+
+        // Event Listeners
+        answerInputEl.addEventListener('input', () => {
+            checkBtn.disabled = answerInputEl.value.trim() === '';
+            nextBtn.disabled = true;
+            feedbackMessageEl.classList.add('hidden');
+        });
+
+        answerInputEl.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                if (feedbackMessageEl.classList.contains('hidden')) {
+                    checkAnswer();
+                } else {
+                    nextWord();
+                }
+            }
+        });
+
+        checkBtn.addEventListener('click', checkAnswer);
+        nextBtn.addEventListener('click', nextWord);
+        playAudioBtn.addEventListener('click', playAudio);
+        newSpanishWordInput.addEventListener('input', () => {
+            addWordBtn.disabled = newSpanishWordInput.value.trim() === '' || newEnglishWordInput.value.trim() === '';
+        });
+        newEnglishWordInput.addEventListener('input', () => {
+            addWordBtn.disabled = newSpanishWordInput.value.trim() === '' || newEnglishWordInput.value.trim() === '';
+        });
+        addWordBtn.addEventListener('click', handleAddWord);
+        showListBtn.addEventListener('click', showWordList);
+        closeListBtn.addEventListener('click', closeWordList);
+        wordListEl.addEventListener('click', handleDeleteWord);
+
+        // Initial setup on window load
+        window.onload = function() {
+            updateUI();
+            updateScore();
+        };
+    </script>
+</body>
+</html>
